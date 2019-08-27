@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ecdata.ec803.dao.PlaybackDao">
+
+    <select id="queryLattice" resultType="hashmap" parameterType="hashmap">
+        SELECT
+            t1.time,t1.id "latticeId",t1.sid "sid",spk,onebest,msgXi,reliability,t1.time "startTime",
+            date_add(t1.time,INTERVAL ((t2.ed - t2.bg)/1000) SECOND)"endTime"
+        FROM
+          feq_lattice t1
+        LEFT JOIN
+          feiq_record t2 ON t1.rcd_id = t2.id
+        WHERE 1 = 1
+        <if test="startTime != null">
+            and t1.time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            and t1.time &lt;= #{endTime}
+        </if>
+        <if test="sid != null and sid != ''">
+            and t1.sid = #{sid}
+        </if>
+    </select>
+
+    <select id="queryStartTime" resultType="date" parameterType="hashmap">
+        SELECT startTime from audio_record where 1 = 1
+        <if test="sid != null and sid != ''">
+            and sid = #{sid}
+        </if>
+    </select>
+    
+    <select id="queryPhysAberration"  resultType="hashmap" parameterType="hashmap">
+       select id,sid,reliability,start_time "startTime",end_time "endTime" from phys_aberration where 1 = 1
+        <if test="sid != null and sid != ''">
+            and sid = #{sid}
+        </if>
+        <if test="reliability != null">
+            and reliability > #{reliability}
+        </if>
+          order by id
+    </select>
+
+</mapper>

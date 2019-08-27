@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ecdata.ec803.dao.UserDao">
+
+    <select id="getUsers" parameterType="hashmap" resultType="hashmap">
+        select
+             user_name userName,
+             user_realname userRealname,
+             user_nickname userNickname,
+             delete_flag deleteFlag
+        from
+        system_user
+    </select>
+
+    <insert id="addUser" parameterType="hashmap" >
+        insert into system_user(
+            user_realname,
+            user_nickname,
+            user_name,
+            user_password,
+            delete_flag
+        )values(
+            #{userRealname},
+            #{userNickname},
+            #{userName},
+            #{userPassword},
+            #{deleteFlag}
+        )
+
+    </insert>
+
+    <update id="editPassword" parameterType="hashmap">
+    update
+    system_user
+    <if test="userPassword != null and userPassword != ''">
+      set  user_password = #{userPassword}
+    </if>
+      where user_id = #{userId}
+    </update>
+</mapper>

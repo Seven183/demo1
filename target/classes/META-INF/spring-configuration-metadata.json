@@ -1,0 +1,87 @@
+{
+  "groups": [
+    {
+      "name": "config",
+      "type": "com.ecdata.ec803.config.Config",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    }
+  ],
+  "properties": [
+    {
+      "name": "config.bat-list-location",
+      "type": "java.lang.String",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    },
+    {
+      "name": "config.ec803-address",
+      "type": "java.lang.String",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    },
+    {
+      "name": "config.ec803-start-sound-record",
+      "type": "java.lang.String",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    },
+    {
+      "name": "config.ec803-start-video-record",
+      "type": "java.lang.String",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    },
+    {
+      "name": "config.ec803-stop-sound-record",
+      "type": "java.lang.String",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    },
+    {
+      "name": "config.ftp-audio",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    },
+    {
+      "name": "config.open-broswer-bat-localtion",
+      "type": "java.lang.String",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    },
+    {
+      "name": "config.police-office",
+      "type": "java.lang.String",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    },
+    {
+      "name": "config.police-office-ip",
+      "type": "java.lang.String",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    },
+    {
+      "name": "config.police-office-location",
+      "type": "java.lang.String",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    },
+    {
+      "name": "config.process-list",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    },
+    {
+      "name": "config.service-list",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    },
+    {
+      "name": "config.sid-location",
+      "type": "java.lang.String",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    },
+    {
+      "name": "config.start-service-bat-localtion",
+      "type": "java.lang.String",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    },
+    {
+      "name": "config.stop-service-bat-localtion",
+      "type": "java.lang.String",
+      "sourceType": "com.ecdata.ec803.config.Config"
+    }
+  ],
+  "hints": []
+}

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ecdata.ec803.dao.ProcessRecordDao">
+    <insert id="insertRecord"  keyProperty="id"  useGeneratedKeys="true" parameterType="com.ecdata.ec803.domain.ProcessRecord">
+        insert into process_record
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="actor != null  and actor != ''" >
+                actor,
+            </if>
+            <if test="act != null  and act!= ''" >
+                act,
+            </if>
+            <if test="datetime != null ">
+                datetime
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="actor != null and actor != ''">
+                #{actor},
+            </if>
+            <if test="act != null and act != ''">
+                #{act},
+            </if>
+            <if test="datetime != null" >
+                #{datetime}
+            </if>
+        </trim>
+    </insert>
+
+    <select id="aaaa">
+        select
+        count (distinct id)
+        from  table_name  p
+        where p.is_valid = 1
+    </select>
+
+</mapper>

@@ -1,0 +1,9 @@
+spring:
+  profiles:
+    active: dev
+#    active: development
+#    active: test
+  application:
+    name: ec803-api
+#   password: '123'
+#

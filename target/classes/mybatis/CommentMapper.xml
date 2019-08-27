@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ecdata.ec803.dao.CommentDao">
+
+    <select id="queryLatticeAndInquestCommentSub" resultType="hashmap"
+            parameterType="com.ecdata.ec803.domain.InquestComment">
+        select cc.latticeId,cc.time,cc.msgXi,cc.spk,if(aa=0,cc.latticeId,0)bb,GROUP_CONCAT(cc.onebest order by time
+        separator ' ') onebest,cc.voiceprintAccuracy ,
+        cc.psychologyAccuracy,cc.systemAccuracy,cc.reliability
+        from (
+        select t1.time,t1.msgXi,t1.id "latticeId",t4.voiceprint_accuracy "voiceprintAccuracy",t4.psychology_accuracy
+        "psychologyAccuracy",
+        t4.system_accuracy "systemAccuracy",round(t1.reliability,2) "reliability",
+        t1.spk,t1.onebest,if(t1.spk=0,(
+        case
+        when t1.spk = (select t2.spk from feq_lattice t2 where t2.id = (select id from feq_lattice where id = t1.id +1))
+        then if(@c =0,@c:=t1.id ,@c)
+        when t1.spk = (select t3.spk from feq_lattice t3 where t3.id = (select id from feq_lattice where id = t1.id -1))
+        then @c
+        else t1.id and @c := 0
+        end
+        ),@c:=0)
+        aa
+        from feq_lattice  t1
+
+        left join inquest_comment_sub t4 on t1.id = t4.lattice_id
+        where 1 = 1
+        <if test="inquestId !=null and inquestId != ''">
+            and t1.sid = #{inquestId}
+        </if>
+        <if test="spk !=null">
+            and t1.spk = #{spk}
+        </if>
+        <choose>
+            <when test="defaultQuery == '1'.toString()">
+                and ( t1.msgXi in
+                <foreach item="item" index="index" collection="voiceprintType.split(',')" open="(" separator=","
+                         close=")">
+                    ${item}
+                </foreach>
+                or
+                <if test="reliabilityType !=null and reliabilityType != ''">
+                    (
+                    ${reliabilityType}
+                    )
+                </if>
+                )
+            </when>
+            <otherwise>
+                <if test="voiceprintType !=null and voiceprintType != ''">
+                    and t1.msgXi in
+                    <foreach item="item" index="index" collection="voiceprintType.split(',')" open="(" separator=","
+                             close=")">
+                        ${item}
+                    </foreach>
+                </if>
+                <if test="reliabilityType !=null and reliabilityType != ''">
+                    and
+                    (
+                    ${reliabilityType}
+                    )
+                </if>
+            </otherwise>
+        </choose>
+
+
+        order by time
+        ) cc
+        group by aa,bb
+        order by time
+
+    </select>
+
+    <select id="queryInquestComment" resultType="com.ecdata.ec803.domain.InquestComment"
+            parameterType="com.ecdata.ec803.domain.InquestComment">
+        select * from inquest_comment t1
+        where 1 = 1
+        <if test="inquestId !=null and inquestId != ''">
+            and t1.inquest_id = #{inquestId}
+        </if>
+    </select>
+
+
+    <insert id="addInquestComment" parameterType="com.ecdata.ec803.domain.InquestComment">
+        insert into inquest_comment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="inquestId != null  and inquestId != ''">
+                inquest_id,
+            </if>
+            <if test="creator != null  and creator != ''">
+                creator,
+            </if>
+            <if test="psychologyScore != null">
+                psychology_score,
+            </if>
+            <if test="voiceprintScore != null">
+                voiceprint_score,
+            </if>
+            <if test="reliabilityScore != null">
+                reliability_score,
+            </if>
+            <if test="queryModuleScore != null">
+                query_module_score,
+            </if>
+            <if test="equipmentUsabilityScore != null">
+                equipment_usability_score,
+            </if>
+            <if test="totalScore != null">
+                total_score,
+            </if>
+            <if test="isHelpfulScore != null">
+                is_helpful_score,
+            </if>
+            <if test="psychologyComment != null  and psychologyComment != ''">
+                psychology_comment,
+            </if>
+            <if test="voiceprintComment != null  and voiceprintComment != ''">
+                voiceprint_comment,
+            </if>
+            <if test="totalComment != null  and totalComment != ''">
+                total_comment,
+            </if>
+            <if test="reliabilityComment != null  and reliabilityComment != ''">
+                reliability_comment,
+            </if>
+            <if test="queryModuleComment != null  and queryModuleComment != ''">
+                query_module_comment,
+            </if>
+            <if test="equipmentUsabilityComment != null  and equipmentUsabilityComment != ''">
+                equipment_usability_comment,
+            </if>
+            <if test="errorDescription != null  and errorDescription != ''">
+                error_description,
+            </if>
+            <if test="isHelpfulComment != null  and isHelpfulComment != ''">
+                is_helpful_comment,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateTime != null">
+                update_time
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="inquestId != null and inquestId != ''">
+                #{inquestId},
+            </if>
+            <if test="creator != null and creator != ''">
+                #{creator},
+            </if>
+            <if test="psychologyScore != null">
+                #{psychologyScore},
+            </if>
+            <if test="voiceprintScore != null">
+                #{voiceprintScore},
+            </if>
+            <if test="reliabilityScore != null">
+                #{reliabilityScore},
+            </if>
+            <if test="queryModuleScore != null">
+                #{queryModuleScore},
+            </if>
+            <if test="equipmentUsabilityScore != null">
+                #{equipmentUsabilityScore},
+            </if>
+            <if test="totalScore != null">
+                #{totalScore},
+            </if>
+            <if test="isHelpfulScore != null">
+                #{isHelpfulScore},
+            </if>
+            <if test="psychologyComment != null and psychologyComment != ''">
+                #{psychologyComment,jdbcType=VARCHAR},
+            </if>
+            <if test="voiceprintComment != null and voiceprintComment != ''">
+                #{voiceprintComment,jdbcType=VARCHAR},
+            </if>
+            <if test="totalComment != null and totalComment != ''">
+                #{totalComment,jdbcType=VARCHAR},
+            </if>
+            <if test="reliabilityComment != null and reliabilityComment != ''">
+                #{reliabilityComment},
+            </if>
+            <if test="queryModuleComment != null and queryModuleComment != ''">
+                #{queryModuleComment},
+            </if>
+            <if test="equipmentUsabilityComment != null and equipmentUsabilityComment != ''">
+                #{equipmentUsabilityComment},
+            </if>
+            <if test="errorDescription != null  and errorDescription != ''">
+                #{errorDescription},
+            </if>
+            <if test="isHelpfulComment != null and isHelpfulComment != ''">
+                #{isHelpfulComment,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime}
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateInquestComment" parameterType="com.ecdata.ec803.domain.InquestComment">
+        update inquest_comment
+        <set>
+            <if test="inquestId != null  and inquestId != ''">
+                inquest_id = #{inquestId},
+            </if>
+            <if test="creator != null  and creator != ''">
+                creator = #{creator},
+            </if>
+            <if test="psychologyScore != null  and psychologyScore != ''">
+                psychology_score = #{psychologyScore},
+            </if>
+            <if test="voiceprintScore != null  and voiceprintScore != ''">
+                voiceprint_score = #{voiceprintScore},
+            </if>
+            <if test="reliabilityScore != null  and reliabilityScore != ''">
+                reliability_score = #{reliabilityScore},
+            </if>
+            <if test="queryModuleScore != null  and queryModuleScore != ''">
+                queryModule_score = #{queryModuleScore},
+            </if>
+            <if test="equipmentUsabilityScore != null  and equipmentUsabilityScore != ''">
+                equipment_usability_score = #{equipmentUsabilityScore},
+            </if>
+            <if test="totalScore != null  and totalScore != ''">
+                total_score = #{totalScore},
+            </if>
+            <if test="isHelpfulScore != null">
+                is_helpful_score = #{isHelpfulScore},
+            </if>
+            <if test="psychologyComment != null  and psychologyComment != ''">
+                psychology_comment = #{psychologyComment},
+            </if>
+            <if test="voiceprintComment != null  and voiceprintComment != ''">
+                voiceprint_comment = #{voiceprintComment},
+            </if>
+            <if test="reliabilityComment != null  and reliabilityComment != ''">
+                reliability_comment = #{reliabilityComment},
+            </if>
+            <if test="queryModuleComment != null  and queryModuleComment != ''">
+                query_module_comment = #{queryModuleComment},
+            </if>
+            <if test="equipmentUsabilityComment != null  and equipmentUsabilityComment != ''">
+                equipment_usability_comment = #{equipmentUsabilityComment},
+            </if>
+            <if test="totalComment != null  and totalComment != ''">
+                total_comment = #{totalComment},
+            </if>
+            <if test="errorDescription != null  and errorDescription != ''">
+                error_description = #{errorDescription},
+            </if>
+            <if test="isHelpfulComment != null  and isHelpfulComment != ''">
+                is_helpful_comment = #{isHelpfulComment},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        where inquest_id = #{inquestId}
+    </update>
+
+
+    <insert id="addInquestCommentSub" parameterType="com.ecdata.ec803.domain.InquestCommentSub">
+        insert into inquest_comment_sub
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="inquestCommentId != null  and inquestCommentId != ''">
+                inquest_comment_id,
+            </if>
+            <if test="latticeId != null  and latticeId != ''">
+                lattice_id,
+            </if>
+            <if test="psychologyAccuracy != null  and psychologyAccuracy != ''">
+                psychology_accuracy,
+            </if>
+            <if test="voiceprintAccuracy != null  and voiceprintAccuracy != ''">
+                voiceprint_accuracy,
+            </if>
+            <if test="systemAccuracy != null  and systemAccuracy != ''">
+                system_accuracy,
+            </if>
+            <if test="updateTime != null">
+                update_time
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="inquestCommentId != null and inquestCommentId != ''">
+                #{inquestCommentId},
+            </if>
+            <if test="latticeId != null and latticeId != ''">
+                #{latticeId},
+            </if>
+            <if test="psychologyAccuracy != null and psychologyAccuracy != ''">
+                #{psychologyAccuracy},
+            </if>
+            <if test="voiceprintAccuracy != null and voiceprintAccuracy != ''">
+                #{voiceprintAccuracy},
+            </if>
+            <if test="systemAccuracy != null and systemAccuracy != ''">
+                #{systemAccuracy},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime}
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateInquestCommentSub" parameterType="com.ecdata.ec803.domain.InquestComment">
+        update inquest_comment_sub
+        <set>
+            <if test="inquestCommentId != null  and inquestCommentId != ''">
+                inquest_comment_id = #{inquestCommentId},
+            </if>
+            <if test="psychologyAccuracy != null  and psychologyAccuracy != ''">
+                psychology_accuracy = #{psychologyAccuracy},
+            </if>
+            <if test="voiceprintAccuracy != null  and voiceprintAccuracy != ''">
+                voiceprint_accuracy = #{voiceprintAccuracy},
+            </if>
+            <if test="systemAccuracy != null  and systemAccuracy != ''">
+                system_accuracy = #{systemAccuracy},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        where lattice_id = #{latticeId}
+    </update>
+
+
+    <select id="queryInquestCommentSub" resultType="com.ecdata.ec803.domain.InquestCommentSub"
+            parameterType="com.ecdata.ec803.domain.InquestCommentSub">
+        select * from inquest_comment_sub t1
+        where 1 = 1
+        <if test="latticeId !=null and latticeId != ''">
+            and t1.lattice_id = #{latticeId}
+        </if>
+    </select>
+
+    <select id="queryAverageScore" resultType="hashmap" parameterType="com.ecdata.ec803.domain.InquestComment">
+        select ROUND(sum(t1.voiceprint_accuracy)/count(1)) voiceprintAverage,
+                       ROUND(sum(t1.psychology_accuracy)/count(1)) psychologyAverage
+        from inquest_comment_sub t1 left join feq_lattice t2 on t2.id = t1.lattice_id
+        where t2.sid = #{inquestId}
+
+    </select>
+
+    <select id="queryIsComment" parameterType="string" resultType="hashmap">
+      select count((ic.id)) "isClosed",(select count(*) from inquest_comment_sub icb left join feq_lattice fl on fl.id = icb.lattice_id where fl.sid = u.id) "assetNums" from feiq_record_info u
+      left join  inquest_comment ic ON u.id = ic.inquest_id where 1=1
+      and u.id = #{inquestId}
+      group by u.id
+    </select>
+
+    <select id="excel" resultType="hashmap" parameterType="hashmap">
+        select cc.time,cc.reliability,cc.titleName,if(aa=0,cc.latticeId,0)bb,GROUP_CONCAT(cc.onebest order by time separator ' ') onebest,cc.voiceprintAccuracy ,
+        cc.psychologyAccuracy,cc.systemAccuracy,cc.msgXi
+        from (
+        select  t1.time,t1.msgXi,t1.id "latticeId",t4.voiceprint_accuracy "voiceprintAccuracy",t4.psychology_accuracy "psychologyAccuracy",
+        t4.system_accuracy "systemAccuracy",round(t1.reliability,2) "reliability",
+        t1.titleName,t1.onebest,if(t1.spk=0,(
+        case
+        when t1.titleName = (select t2.spk from feq_lattice t2 where t2.id = (select id from feq_lattice where id = t1.id +1)) then if(@c =0,@c:=t1.id ,@c)
+        when t1.titleName = (select t3.spk from feq_lattice t3 where t3.id = (select id from feq_lattice where id = t1.id -1)) then @c
+        else t1.id and @c := 0
+        end
+        ),@c:=0)
+        aa
+        from feq_lattice  t1
+        left join inquest_comment_sub t4 on t1.id = t4.lattice_id
+        where 1 = 1
+        and t1.sid = #{inquestId}
+        order by time
+        ) cc
+        group by aa,bb
+        order by time
+    </select>
+
+    <select id="excel_comment" resultType="hashmap" parameterType="hashmap">
+        select psychology_score,voiceprint_score,reliability_score,query_module_score,equipment_usability_score,
+               psychology_comment,voiceprint_comment,reliability_comment,query_module_comment,equipment_usability_comment,
+               error_description,total_comment
+        from  inquest_comment
+        where inquest_id = #{inquestId}
+    </select>
+
+
+    <select id="queryHighPhysAberrationLattice" parameterType="hashmap" resultType="hashmap">
+        select a.*,max(b.reliability) "physAberration" from (
+        select t1.id "latticeId",t1.time,t1.time "startTime",date_add(t1.time,interval (t2.ed-t2.bg)/1000 second)"endTime"
+        ,t1.reliability,t1.sid "sid",
+        t1.msgXi,t1.spk,t1.onebest,t3.voiceprint_accuracy "voiceprintAccuracy" ,
+        t3.psychology_accuracy "psychologyAccuracy",t3.system_accuracy "systemAccuracy"
+        from feq_lattice t1
+        left join feiq_record t2 on t1.rcd_id = t2.id
+        left JOIN inquest_comment_sub t3 on t1.id = t3.lattice_id
+        where t1.sid = #{sid}
+        <choose>
+            <when test="defaultQuery == '1'.toString()">
+                <!--
+                and ( t1.msgXi in
+                <foreach item="item" index="index" collection="voiceprintType.split(',')" open="(" separator=","
+                         close=")">
+                    ${item}
+                </foreach>
+                or
+                <if test="reliabilityType !=null and reliabilityType != ''">
+                    (
+                    ${reliabilityType}
+                    )
+                </if>
+                )
+                -->
+            </when>
+            <otherwise>
+                <if test="voiceprintType !=null and voiceprintType != ''">
+                    and t1.msgXi in
+                    <foreach item="item" index="index" collection="voiceprintType.split(',')" open="(" separator=","
+                             close=")">
+                        ${item}
+                    </foreach>
+                </if>
+                <if test="reliabilityType !=null and reliabilityType != ''">
+                    and
+                    (
+                    ${reliabilityType}
+                    )
+                </if>
+            </otherwise>
+        </choose>
+        )a
+        left join phys_aberration b on a.sid = b.sid and
+        (
+        (a.startTime >= b.start_time and a.startTime &lt; b.end_time)
+        or (a.endTime >= b.start_time and a.endTime &lt; b.end_time)
+        or (a.startTime >= b.start_time and a.endTime &lt; b.end_time)
+        or (a.startTime &lt; b.start_time and a.endTime >= b.end_time)
+        )
+        WHERE 1 = 1
+        <if test="reliability !=null and reliability != ''">
+           and  b.reliability > #{reliability}
+        </if>
+        group by latticeId
+        order by a.latticeId
+    </select>
+
+
+    <select id="queryPhysAberrationNearbyLattice" parameterType="hashmap" resultType="hashmap">
+    select *,max(a._reliability) "physAberration" from (
+        select t1.id "latticeId",t1.time,t1.time "startTime",date_add(t1.time,interval (t2.ed-t2.bg)/1000 second)"endTime" ,t1.reliability,t1.sid "sid",
+        t1.msgXi,t1.spk,t1.onebest,t3.voiceprint_accuracy "voiceprintAccuracy" ,
+        t3.psychology_accuracy "psychologyAccuracy",t3.system_accuracy "systemAccuracy",t4.reliability "_reliability"
+        from feq_lattice t1
+        left join feiq_record t2 on t1.rcd_id = t2.id
+        left JOIN inquest_comment_sub t3 on t1.id = t3.lattice_id
+        left join phys_aberration t4 on t1.sid = t4.sid and
+        (
+        (t1.time >= t4.start_time and  t1.time &lt;= t4.end_time)
+        or (date_add(t1.time,interval (t2.ed-t2.bg)/1000 second) >= t4.start_time and  date_add(t1.time,interval (t2.ed-t2.bg)/1000 second) &lt;= t4.end_time)
+        or (t1.time >= t4.start_time and  date_add(t1.time,interval (t2.ed-t2.bg)/1000 second) &lt;= t4.end_time)
+        or (t1.time &lt;= t4.start_time and  date_add(t1.time,interval (t2.ed-t2.bg)/1000 second) >= t4.end_time)
+        )
+        where t1.sid = #{sid}
+        order by t1.id
+        ) a
+        where 1 <![CDATA[ <> ]]>   1
+        <foreach item="items" index="index" collection="list"  >
+            <!-- 这块是有问题的 后面交大的心理异动性改成1秒了再改-->
+            <trim prefix="or">
+                (startTime &gt;= DATE_SUB(#{items.startTime},INTERVAL 3 minute)
+                and endTime &lt;= DATE_ADD(#{items.endTime},INTERVAL 3 minute))
+            </trim>
+        </foreach>
+        group by latticeId
+    </select>
+
+
+    <select id="queryAverageSubScore" resultType="hashmap" parameterType="com.ecdata.ec803.domain.InquestComment">
+        select ROUND(sum(t1.psychology_accuracy)* (100/(3*count(psychology_accuracy)))) "psychologyAverage",
+        ROUND(sum(t1.voiceprint_accuracy)* (100/(3*count(voiceprint_accuracy)))) "voiceprintAverage"
+        from inquest_comment_sub t1 left join feq_lattice t2 on t1.lattice_id = t2.id
+        where t2.sid = #{inquestId}
+    </select>
+</mapper>
